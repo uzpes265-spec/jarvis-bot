@@ -3,6 +3,7 @@ import logging
 import re
 from aiogram import Bot, Dispatcher, types
 from aiogram.filters import Command
+import os
 
 TOKEN = os.getenv("BOT_TOKEN")
 
