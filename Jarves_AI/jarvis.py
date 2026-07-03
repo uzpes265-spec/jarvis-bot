@@ -104,8 +104,26 @@ async def generate_report(message: types.Message):
     
     await message.reply(report, parse_mode="Markdown")
 
+# Oddiy HTTP ping yo'lagi (UptimeRobot Render'ni uyg'oq tutishi uchun)
+async def handle(request):
+    return web.Response(text="Men tirikman!")
+
 async def main():
+    # Veb serverni sozlash
+    app = web.Application()
+    app.router.add_get('/', handle)
+    
+    # Portni Render muhitidan avtomatik olish
+    port = int(os.environ.get("PORT", 8080))
+    
+    # Serverni orqa fonda asinxron ishga tushirish
+    runner = web.AppRunner(app)
+    await runner.setup()
+    site = web.TCPSite(runner, '0.0.0.0', port)
+    await site.start()
+    
     print("Aqlli hisobchi bot ishga tushdi...")
+    # Botni ishga tushirish
     await dp.start_polling(bot)
 
 if __name__ == '__main__':
