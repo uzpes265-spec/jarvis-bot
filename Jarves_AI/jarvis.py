@@ -6,8 +6,7 @@ import sqlite3
 from datetime import datetime, timedelta
 from aiogram import Bot, Dispatcher, types
 from aiogram.filters import Command
-import speech_recognition as sr
-from pydub import AudioSegment
+
 
 TOKEN = os.getenv("BOT_TOKEN")
 
