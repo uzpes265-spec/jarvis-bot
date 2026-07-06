@@ -115,10 +115,10 @@ async def matnni_tahlil_qilish(message: types.Message, text: str):
     elif "1 oylik" in text or "oylik harajat" in text:
         kunlar = 30
         
-    if kunlar is tracking_period := kunlar:
-        daromat, xarajat = vaqtli_statistika(message.from_user.id, tracking_period)
+  if kunlar is not None:
+        daromat, xarajat = vaqtli_statistika(message.from_user.id, kunlar)
         await message.answer(
-            f"📅 **{tracking_period} kunlik umumiy statistika:**\n\n"
+            f"📅 **{kunlar} kunlik umumiy statistika:**\n\n"
             f"💰 Daromad: `{daromat} so'm`\n"
             f"💸 Xarajat: `{xarajat} so'm`\n"
             f"💳 Umumiy sof foyda: `{daromat - xarajat} so'm`"
