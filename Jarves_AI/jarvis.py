@@ -7,7 +7,6 @@ from datetime import datetime, timedelta
 from aiogram import Bot, Dispatcher, types
 from aiogram.filters import Command
 
-
 TOKEN = os.getenv("BOT_TOKEN")
 
 bot = Bot(token=TOKEN)
