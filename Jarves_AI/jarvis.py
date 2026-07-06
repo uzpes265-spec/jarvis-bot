@@ -154,29 +154,49 @@ async def matnni_tahlil_qilish(message: types.Message, text: str):
 async def handle_text(message: types.Message):
     await matnni_tahlil_qilish(message, message.text)
 
-# OVOZLI XABARLAR UCHUN (Voice Message)
+# OVOZLI XABARLAR UCHUN (To'liq ovozni tushunish tizimi)
 @dp.message(lambda message: message.voice is not None)
 async def handle_voice(message: types.Message):
-    await message.answer("🎙 Ovozli xabaringiz qabul qilindi, tahlil qilinmoqda...")
+    await message.answer("🎙 Ovozli xabaringiz qabul qilindi, matnga o'girilmoqda...")
     
-    # Telegramdan ovozli faylni yuklab olish
     file_id = message.voice.file_id
     file = await bot.get_file(file_id)
     file_path = file.file_path
     
-    # Ovozli faylni vaqtincha serverga saqlaymiz
-    local_filename = f"voice_{message.from_user.id}.ogg"
-    await bot.download_file(file_path, local_filename)
+    # Ovozli fayllarni vaqtincha nomlash
+    ogg_filename = f"voice_{message.from_user.id}.ogg"
+    wav_filename = f"voice_{message.from_user.id}.wav"
     
-    # Hozircha tekin serverda ovozni matnga o'g'irish murakkab bo'lgani uchun,
-    # bot ovoz kelganini tasdiqlaydi. To'liq ovozni tushunish (Speech-to-Text) uchun
-    # keyingi bosqichda bitta tekin kutubxona qo'shamiz.
-    await message.answer("💡 Ovozli xabarlarni matnga o'giruvchi modul tekshirilmoqda. Hozircha xarajatlarni matn ko'rinishida yozib turishingizni tavsiya qilaman!")
+    # Telegramdan faylni yuklab olish
+    await bot.download_file(file_path, ogg_filename)
     
-    # Faylni o'chirib tashlaymiz (server to'lib ketmasligi uchun)
-    if os.path.exists(local_filename):
-        os.remove(local_filename)
+    try:
+        import speech_recognition as sr
+        from pydub import AudioSegment
+        
+        # .ogg formatini .wav formatiga o'tkazamiz (Google tushunishi uchun)
+        audio = AudioSegment.from_ogg(ogg_filename)
+        audio.export(wav_filename, format="wav")
+        
+        # Google AI orqali ovozni matnga aylantiramiz
+        recognizer = sr.Recognizer()
+        with sr.AudioFile(wav_filename) as source:
+            audio_data = recognizer.record(source)
+            # O'zbek tilini tanish kodi: uz-UZ
+            matn = recognizer.recognize_google(audio_data, language="uz-UZ")
+            
+        await message.answer(f"🗣 Siz dedingiz: *\"{matn}\"*", parse_mode="Markdown")
+        
+        # Chiqqan matnni hisob-kitob funksiyamizga yuboramiz
+        await matnni_tahlil_qilish(message, matn)
 
+    except Exception as e:
+        await message.answer("💡 Hozircha ovozli xabarni matnga o'girishda serverda cheklov bo'ldi. Xarajatlarni matn ko'rinishida yozib turishingizni tavsiya qilaman!")
+    finally:
+        # Serverda ortiqcha joy egallamasligi uchun fayllarni o'chiramiz
+        import os
+        if os.path.exists(ogg_filename): os.remove(ogg_filename)
+        if os.path.exists(wav_filename): os.remove(wav_filename)
 async def main():
     logging.basicConfig(level=logging.INFO)
     await dp.start_polling(bot)
