@@ -114,8 +114,8 @@ async def matnni_tahlil_qilish(message: types.Message, text: str):
         kunlar = 7
     elif "1 oylik" in text or "oylik harajat" in text:
         kunlar = 30
-        
-  if kunlar is not None:
+
+    if kunlar is not None:
         daromat, xarajat = vaqtli_statistika(message.from_user.id, kunlar)
         await message.answer(
             f"📅 **{kunlar} kunlik umumiy statistika:**\n\n"
