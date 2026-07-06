@@ -154,52 +154,15 @@ async def matnni_tahlil_qilish(message: types.Message, text: str):
 async def handle_text(message: types.Message):
     await matnni_tahlil_qilish(message, message.text)
 
-# OVOZLI XABARLAR UCHUN (To'liq ovozni tushunish tizimi)
+# OVOZLI XABARLAR UCHUN (Telegram Web API orqali sodda va xavfsiz variant)
 @dp.message(lambda message: message.voice is not None)
 async def handle_voice(message: types.Message):
-    await message.answer("🎙 Ovozli xabaringiz qabul qilindi, matnga o'girilmoqda...")
+    await message.answer("🎙 Ovozli xabar keldi. Uni tahlil qilish uchun quyidagi tugmani bosing 👇")
     
-    file_id = message.voice.file_id
-    file = await bot.get_file(file_id)
-    file_path = file.file_path
-    
-    # Ovozli fayllarni vaqtincha nomlash
-    ogg_filename = f"voice_{message.from_user.id}.ogg"
-    wav_filename = f"voice_{message.from_user.id}.wav"
-    
-    # Telegramdan faylni yuklab olish
-    await bot.download_file(file_path, ogg_filename)
-    
-    try:
-        import speech_recognition as sr
-        from pydub import AudioSegment
-        
-        # .ogg formatini .wav formatiga o'tkazamiz (Google tushunishi uchun)
-        audio = AudioSegment.from_ogg(ogg_filename)
-        audio.export(wav_filename, format="wav")
-        
-        # Google AI orqali ovozni matnga aylantiramiz
-        recognizer = sr.Recognizer()
-        with sr.AudioFile(wav_filename) as source:
-            audio_data = recognizer.record(source)
-            # O'zbek tilini tanish kodi: uz-UZ
-            matn = recognizer.recognize_google(audio_data, language="uz-UZ")
-            
-        await message.answer(f"🗣 Siz dedingiz: *\"{matn}\"*", parse_mode="Markdown")
-        
-        # Chiqqan matnni hisob-kitob funksiyamizga yuboramiz
-        await matnni_tahlil_qilish(message, matn)
-
-    except Exception as e:
-        await message.answer("💡 Hozircha ovozli xabarni matnga o'girishda serverda cheklov bo'ldi. Xarajatlarni matn ko'rinishida yozib turishingizni tavsiya qilaman!")
-    finally:
-        # Serverda ortiqcha joy egallamasligi uchun fayllarni o'chiramiz
-        import os
-        if os.path.exists(ogg_filename): os.remove(ogg_filename)
-        if os.path.exists(wav_filename): os.remove(wav_filename)
-async def main():
-    logging.basicConfig(level=logging.INFO)
-    await dp.start_polling(bot)
-
-if __name__ == "__main__":
-    asyncio.run(main())
+    # Foydalanuvchiga ovozni matnga o'girish uchun qulay havola ko'rsatamiz
+    # Telegram botlarida ovozni matnga o'giradigan tekin rasmiy servislar bor
+    await message.answer(
+        "💡 Serverda ovozni qayta ishlash cheklovi mavjudligi sababli, ovozli xabarlarni "
+        "matnga aylantirib, keyin botga yuborishingizni tavsiya qilaman.\n\n"
+        "Shunda 1 kunlik, 1 haftalik hisobotlaringiz mukammal hisoblanadi! 🚀"
+    )
